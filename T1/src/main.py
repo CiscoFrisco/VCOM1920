@@ -18,6 +18,7 @@ def readImageFromCamera():
     cap.release()
     return frame
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process a road image.')
     parser.add_argument(
@@ -29,11 +30,22 @@ if __name__ == "__main__":
 
     if image is None:
         quit()
-        
-    # color_detection.colorDetection(image)
-    # image = shape_detection.circleDetection(image)
-    image = shape_detection.lineDetection(image)
 
+    blueRes, redRes = color_detection.colorDetection(image)
+    rectangleBlue = shape_detection.rectangleDetection(image, blueRes)
+    rectangleRed = shape_detection.rectangleDetection(image, redRes)
+    triangleBlue = shape_detection.triangleDetection(image, blueRes)
+    triangleRed = shape_detection.triangleDetection(image, redRes)
+    circleBlue = shape_detection.circleDetection(image, blueRes)
+    circleRed = shape_detection.circleDetection(image, redRes)
     cv2.imshow('image', image)
+    cv2.imshow('circleBlue', circleBlue)
+    cv2.imshow('circleRed', circleRed)
+    cv2.imshow('rectangleRed', rectangleRed)
+    cv2.imshow('rectangleBlue', rectangleBlue)
+    cv2.imshow('triangleBlue', triangleBlue)
+    cv2.imshow('triangleRed', triangleRed)
+    cv2.imshow('blueRes', blueRes)
+    cv2.imshow('redRes', redRes)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
