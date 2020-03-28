@@ -8,13 +8,13 @@ def colorDetection(image):
     lower_blue = np.array([100, 150, 0])
     upper_blue = np.array([140, 255, 255])
 
-    lower_red = np.array([0, 50, 50])
+    lower_red = np.array([0, 191, 50])
     upper_red = np.array([10, 255, 255])
     mask0 = cv2.inRange(hsvImg, lower_red, upper_red)
 
     # upper mask (170-180)
-    lower_red = np.array([170, 50, 50])
-    upper_red = np.array([180, 255, 255])
+    lower_red = np.array([160, 191, 50])
+    upper_red = np.array([179, 255, 255])
     mask1 = cv2.inRange(hsvImg, lower_red, upper_red)
 
     # join my masks
