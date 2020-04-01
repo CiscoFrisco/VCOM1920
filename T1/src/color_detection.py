@@ -37,4 +37,8 @@ def colorDetection(image):
     # Bitwise-AND mask and original image
     blueRes = cv2.bitwise_and(image, image, mask=blueMask)
 
-    return blueRes, redRes
+    mask = blueMask + redMask
+
+    res = cv2.bitwise_and(image, image, mask=mask)
+
+    return res

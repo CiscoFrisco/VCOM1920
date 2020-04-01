@@ -31,8 +31,8 @@ if __name__ == "__main__":
         print("Image not found!")
         quit()
 
-    blueRes, redRes = color_detection.colorDetection(image)
-    signs = shape_detection.shapeDetection(image, blueRes, redRes)
+    colorRes = color_detection.colorDetection(image)
+    signs = shape_detection.shapeDetection(image, colorRes)
 
     cv2.imshow('Signs', signs)
     # cv2.imshow('blueRes', blueRes)

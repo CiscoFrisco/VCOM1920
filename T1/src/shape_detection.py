@@ -62,20 +62,15 @@ def detect_shape(c):
     return shape
 
 
-def shapeDetection(image, blueRes, redRes):
+def shapeDetection(image, colorRes):
     img = image.copy()
-    _, _,blueV = cv2.split(blueRes)
-    _, _,redV = cv2.split(redRes)
+    _, _,v = cv2.split(colorRes)
 
-    cv2.imshow("gray1", blueV)
-    cv2.imshow("gray2", redV)
+    cv2.imshow("gray", v)
 
     # Find contours and detect shape
-    blueCnts = cv2.findContours(blueV, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    redCnts = cv2.findContours(redV, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    blueCnts = blueCnts[0] if len(blueCnts) == 2 else blueCnts[1]
-    redCnts = redCnts[0] if len(redCnts) == 2 else redCnts[1]
-    cnts = redCnts + blueCnts
+    cnts = cv2.findContours(v, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = cnts[0] if len(cnts) == 2 else cnts[1]
 
     for c in cnts:
 
