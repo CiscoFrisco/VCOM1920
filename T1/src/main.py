@@ -32,24 +32,9 @@ if __name__ == "__main__":
         quit()
 
     blueRes, redRes = color_detection.colorDetection(image)
+    signs = shape_detection.shapeDetection(image, blueRes, redRes)
 
-    rectangleBlue = shape_detection.rectangleDetection(image, blueRes, "blue")
-    rectangleRed = shape_detection.rectangleDetection(rectangleBlue, redRes, "red")
-    triangleBlue = shape_detection.triangleDetection(rectangleRed, blueRes, "blue")
-    triangleRed = shape_detection.triangleDetection(triangleBlue, redRes, "red")
-    circleBlue = shape_detection.circleDetection(triangleRed, blueRes, "blue")
-    circleRed = shape_detection.circleDetection(circleBlue, redRes, "red")
-
-    cv2.imshow('image', image)
-
-    # cv2.imshow('rectangleBlue', rectangleBlue)
-    # cv2.imshow('rectangleRed', rectangleRed)
-
-    # cv2.imshow('triangleBlue', triangleBlue)
-    # cv2.imshow('triangleRed', triangleRed)
-    # cv2.imshow('circleBlue', circleBlue)
-    cv2.imshow('circleRed', circleRed)
-
+    cv2.imshow('Signs', signs)
     # cv2.imshow('blueRes', blueRes)
     # cv2.imshow('redRes', redRes)
 
