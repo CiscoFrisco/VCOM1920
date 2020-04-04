@@ -36,7 +36,7 @@ def detect_shape(c):
     # Compute perimeter of contour and perform contour approximation
     shape = ""
     peri = cv2.arcLength(c, True)
-    approx = cv2.approxPolyDP(c, 0.013 * peri, True)
+    approx = cv2.approxPolyDP(c, 0.04 * peri, True)
     
     print(len(approx))
 
@@ -53,12 +53,8 @@ def detect_shape(c):
         # equal to one, otherwise, the shape is a rectangle
         shape = "square" if ar >= 0.95 and ar <= 1.05 else "rectangle"
 
-    # Stop
-    elif len(approx) == 8:
-        shape = "stop"
-
     # Otherwise assume as circle or oval
-    elif len(approx) >= 8:
+    else:
         shape = "circle"
 
     return shape
@@ -96,8 +92,7 @@ def shapeDetection(image, colorRes, redRes, blueRes):
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
             centers.append([cX, cY])
-            cv2.putText(img, shape, (cX - 20, cY),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)
+            writeText(img, shape, 0.5, cX, (cY + 10))
             cv2.drawContours(img, [c], 0, (0, 255, 0), 6)
 
     writeColor(img, blueCnts, centers, "blue")
@@ -115,8 +110,7 @@ def writeColor(img, cnts, centers, color):
             cY = int(M["m01"] / M["m00"])
 
             if [cX, cY] in centers:
-                cv2.putText(img, color, (cX - 20, cY - 20),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)
+                writeText(img, color, 0.5, cX, (cY - 10))
 
 
 def triangleDetection(image, res, color):
