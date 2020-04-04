@@ -4,7 +4,7 @@ import imutils
 
 
 def circleDetection(image, res, color):
-    h,s,v = cv2.split(res)
+    h, s, v = cv2.split(res)
 
     cimg = image.copy()
 
@@ -36,7 +36,9 @@ def detect_shape(c):
     # Compute perimeter of contour and perform contour approximation
     shape = ""
     peri = cv2.arcLength(c, True)
-    approx = cv2.approxPolyDP(c, 0.04 * peri, True)
+    approx = cv2.approxPolyDP(c, 0.013 * peri, True)
+    
+    print(len(approx))
 
     # Triangle
     if len(approx) == 3:
@@ -51,20 +53,22 @@ def detect_shape(c):
         # equal to one, otherwise, the shape is a rectangle
         shape = "square" if ar >= 0.95 and ar <= 1.05 else "rectangle"
 
-    # Octagon 
+    # Stop
     elif len(approx) == 8:
         shape = "stop"
 
     # Otherwise assume as circle or oval
-    elif len(approx) > 8:
+    elif len(approx) >= 8:
         shape = "circle"
 
     return shape
 
 
-def shapeDetection(image, colorRes):
+def shapeDetection(image, colorRes, redRes, blueRes):
     img = image.copy()
-    _, _,v = cv2.split(colorRes)
+    _, _, v = cv2.split(colorRes)
+    _, _, redV = cv2.split(redRes)
+    _, _, blueV = cv2.split(blueRes)
 
     cv2.imshow("gray", v)
 
@@ -72,8 +76,16 @@ def shapeDetection(image, colorRes):
     cnts = cv2.findContours(v, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = cnts[0] if len(cnts) == 2 else cnts[1]
 
-    for c in cnts:
+    blueCnts = cv2.findContours(
+        blueV, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    blueCnts = blueCnts[0] if len(blueCnts) == 2 else blueCnts[1]
 
+    redCnts = cv2.findContours(
+        redV, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    redCnts = redCnts[0] if len(redCnts) == 2 else redCnts[1]
+
+    centers = []
+    for c in cnts:
         area = cv2.contourArea(c)
 
         if area > 100:        # Identify shape
@@ -83,17 +95,34 @@ def shapeDetection(image, colorRes):
             M = cv2.moments(c)
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
-            cv2.putText(img, shape, (cX - 20, cY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36,255,12), 2)
+            centers.append([cX, cY])
+            cv2.putText(img, shape, (cX - 20, cY),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)
             cv2.drawContours(img, [c], 0, (0, 255, 0), 6)
+
+    writeColor(img, blueCnts, centers, "blue")
+    writeColor(img, redCnts, centers, "red")
 
     return img
 
+def writeColor(img, cnts, centers, color):
+    for c in cnts:
+        area = cv2.contourArea(c)
+
+        if area > 100:        # Identify shape
+            M = cv2.moments(c)
+            cX = int(M["m10"] / M["m00"])
+            cY = int(M["m01"] / M["m00"])
+
+            if [cX, cY] in centers:
+                cv2.putText(img, color, (cX - 20, cY - 20),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)
 
 
 def triangleDetection(image, res, color):
     img = image.copy()
-    h,s,v = cv2.split(res)
-    
+    h, s, v = cv2.split(res)
+
     canny = cv2.Canny(v, 50, 200)
     contours, hier = cv2.findContours(canny, 1, 2)
     tri = []
@@ -104,7 +133,8 @@ def triangleDetection(image, res, color):
             area = cv2.contourArea(cnt)
 
             if area > 100:
-                approx = cv2.approxPolyDP(cnt, 0.01*cv2.arcLength(cnt, True), True)
+                approx = cv2.approxPolyDP(
+                    cnt, 0.01*cv2.arcLength(cnt, True), True)
                 if len(approx) == 3:
                     cv2.drawContours(img, [cnt], 0, (0, 255, 0), 2)
                     tri = approx
@@ -113,7 +143,8 @@ def triangleDetection(image, res, color):
                     x, y = triangleCenter(tri[0], tri[1], tri[2])
                     writeText(img, color + " triangle", 0.6, x, y)
                     for vertex in tri:
-                        cv2.circle(img, (vertex[0][0], vertex[0][1]), 5, 255, -1)
+                        cv2.circle(
+                            img, (vertex[0][0], vertex[0][1]), 5, 255, -1)
 
     return img
 
@@ -127,7 +158,6 @@ def rectangleDetection(image, res, color):
     gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (3, 3), 0)
     canny = cv2.Canny(blurred, 120, 255, 1)
-
 
     # Find contours
     cnts = cv2.findContours(canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
