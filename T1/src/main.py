@@ -31,23 +31,36 @@ if __name__ == "__main__":
         print("Image not found!")
         quit()
 
+
+    #Color correction
+    contrast_image = color_detection.fixBadContrast(image)
+    lighting_image = color_detection.fixBadLighting(image)
+    
+
     # Color detection in both regular and bad lighting
     regColorRes, regBlueRes, regRedRes = color_detection.colorDetection(image, "regular")
-    badColorRes, badBlueRes, badRedRes = color_detection.colorDetection(image, "bad")
+    contrastColorRes, contrastBlueRes, contrastRedRes = color_detection.colorDetection(contrast_image, "bad")
+    lightingColorRes, lightingBlueRes, lightingRedRes = color_detection.colorDetection(lighting_image, "bad")
     
     #Shape detection in both regular and bad lighting
+    
     regular_signs = shape_detection.shapeDetection(image, regColorRes, regRedRes, regBlueRes)
-    bad_signs = shape_detection.shapeDetection(image, badColorRes, badRedRes, badBlueRes)
+    contrast_regular_signs = shape_detection.shapeDetection(contrast_image, contrastColorRes, contrastRedRes, contrastBlueRes)
+    lighting_regular_signs = shape_detection.shapeDetection(lighting_image, lightingColorRes, lightingRedRes, lightingBlueRes)
+
+    # bad_signs = shape_detection.shapeDetection(image, badColorRes, badRedRes, badBlueRes)
 
     # Print Results
-    cv2.imshow('Regular Lighting', regular_signs)
-    cv2.imshow('Bad Lighting', bad_signs)
-    
-    cv2.imshow('Regular Blue', regBlueRes)
-    cv2.imshow('Bad Blue', badBlueRes)
+    cv2.imshow('Regular', regular_signs)
+    cv2.imshow('Fixed Contrast', contrast_regular_signs)
+    cv2.imshow('Fixed Lighting', lighting_regular_signs)
 
-    cv2.imshow('Regular Red', regRedRes)
-    cv2.imshow('Bad Red', badRedRes)
+    
+    # cv2.imshow('Regular Blue', regBlueRes)
+    # cv2.imshow('Bad Blue', badBlueRes)
+
+    # cv2.imshow('Regular Red', regRedRes)
+    # cv2.imshow('Bad Red', badRedRes)
 
 
     cv2.waitKey(0)

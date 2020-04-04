@@ -17,6 +17,38 @@ lighting = {
 }
 
 
+def fixBadContrast(image):
+    img = image.copy()
+   
+    # _, _, gray = cv2.split(image)
+    # clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    # cl1 = clahe.apply(gray)
+
+    # cv2.imshow("contrast", cl1)
+
+    lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+    
+    clahe = cv2.createCLAHE(clipLimit=2.0,tileGridSize=(8,8))
+    lab[...,0] = clahe.apply(lab[...,0])
+    
+    contrast = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
+    
+    return contrast
+
+
+def fixBadLighting(image):
+
+    img_yuv = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
+
+    # equalize the histogram of the Y channel
+    img_yuv[:,:,0] = cv2.equalizeHist(img_yuv[:,:,0])
+
+    # convert the YUV image back to RGB format
+    lighting = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
+
+    return lighting
+
+
 def colorDetection(image, type):
     hsvImg = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
