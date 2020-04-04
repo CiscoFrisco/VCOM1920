@@ -87,13 +87,14 @@ def shapeDetection(image, colorRes, redRes, blueRes):
         if area > 100:        # Identify shape
             shape = detect_shape(c)
 
-            # Find centroid and label shape name
-            M = cv2.moments(c)
-            cX = int(M["m10"] / M["m00"])
-            cY = int(M["m01"] / M["m00"])
-            centers.append([cX, cY])
-            writeText(img, shape, 0.5, cX, (cY + 10))
-            cv2.drawContours(img, [c], 0, (0, 255, 0), 6)
+            if shape != "":
+                # Find centroid and label shape name
+                M = cv2.moments(c)
+                cX = int(M["m10"] / M["m00"])
+                cY = int(M["m01"] / M["m00"])
+                centers.append([cX, cY])
+                writeText(img, shape, 0.5, cX, (cY + 10))
+                cv2.drawContours(img, [c], 0, (0, 255, 0), 6)
 
     writeColor(img, blueCnts, centers, "blue")
     writeColor(img, redCnts, centers, "red")

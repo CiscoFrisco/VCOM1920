@@ -31,12 +31,24 @@ if __name__ == "__main__":
         print("Image not found!")
         quit()
 
-    colorRes, blueRes, redRes = color_detection.colorDetection(image)
-    signs = shape_detection.shapeDetection(image, colorRes, redRes, blueRes)
+    # Color detection in both regular and bad lighting
+    regColorRes, regBlueRes, regRedRes = color_detection.colorDetection(image, "regular")
+    badColorRes, badBlueRes, badRedRes = color_detection.colorDetection(image, "bad")
+    
+    #Shape detection in both regular and bad lighting
+    regular_signs = shape_detection.shapeDetection(image, regColorRes, regRedRes, regBlueRes)
+    bad_signs = shape_detection.shapeDetection(image, badColorRes, badRedRes, badBlueRes)
 
-    cv2.imshow('Signs', signs)
-    # cv2.imshow('blueRes', blueRes)
-    # cv2.imshow('redRes', redRes)
+    # Print Results
+    cv2.imshow('Regular Lighting', regular_signs)
+    cv2.imshow('Bad Lighting', bad_signs)
+    
+    cv2.imshow('Regular Blue', regBlueRes)
+    cv2.imshow('Bad Blue', badBlueRes)
+
+    cv2.imshow('Regular Red', regRedRes)
+    cv2.imshow('Bad Red', badRedRes)
+
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
