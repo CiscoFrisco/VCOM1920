@@ -2,18 +2,18 @@ import cv2
 import numpy as np
 
 lighting = {
-    'regular_lower_blue' : np.array([100, 150, 0]),
-    'regular_upper_blue' : np.array([140, 255, 255]),
+    'regular_lower_blue' : np.array([100, 160, 50]),
+    'regular_upper_blue' : np.array([135, 255, 255]),
     'regular_lower_red1' : np.array([0,180,120]),
     'regular_upper_red1' : np.array([10,255,255]),
     'regular_lower_red2' : np.array([170,180,120]),
     'regular_upper_red2' : np.array([180,255,255]),
-    'bad_lower_blue' : np.array([100, 120, 50]),
-    'bad_upper_blue' : np.array([140, 255, 127]),
-    'bad_lower_red1' : np.array([0,120,50]),
-    'bad_upper_red1' : np.array([10,255,127]),
-    'bad_lower_red2' : np.array([170,120,50]),
-    'bad_upper_red2' : np.array([180,255,120])
+    'bad_lower_blue' : np.array([100, 150, 50]),
+    'bad_upper_blue' : np.array([140, 255, 255]),
+    'bad_lower_red1' : np.array([0,70,70]),
+    'bad_upper_red1' : np.array([10,255,255]),
+    'bad_lower_red2' : np.array([170,70,70]),
+    'bad_upper_red2' : np.array([180,255,255])
 }
 
 

@@ -76,8 +76,6 @@ def shapeDetection(image, colorRes, redRes, blueRes):
     _, _, redV = cv2.split(redRes)
     _, _, blueV = cv2.split(blueRes)
 
-    cv2.imshow("gray", v)
-
     # Find contours and detect shape
     cnts = cv2.findContours(v, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = cnts[0] if len(cnts) == 2 else cnts[1]

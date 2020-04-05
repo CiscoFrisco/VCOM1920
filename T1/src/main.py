@@ -55,6 +55,14 @@ if __name__ == "__main__":
     cv2.imshow('Fixed Contrast', contrast_regular_signs)
     cv2.imshow('Fixed Lighting', lighting_regular_signs)
 
+    # cv2.imshow('Regular Blue', regBlueRes)
+    # cv2.imshow('Contrast Blue', contrastBlueRes)
+    # cv2.imshow('Lighting Blue', lightingBlueRes)
+
+    # cv2.imshow('Regular Red', regRedRes)
+    # cv2.imshow('Contrast Red', contrastRedRes)
+    # cv2.imshow('Lighting Red', lightingRedRes)
+
     
     # cv2.imshow('Regular Blue', regBlueRes)
     # cv2.imshow('Bad Blue', badBlueRes)
