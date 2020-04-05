@@ -9,7 +9,7 @@ def circleDetection(image, res, color):
     cimg = image.copy()
 
     circles = cv2.HoughCircles(v, cv2.HOUGH_GRADIENT, 1, 120,
-                               param1=50, param2=50, minRadius=5, maxRadius=0)
+                               param1=50, param2=30, minRadius=0, maxRadius=0)
 
     if circles is not None:
         circles = np.uint16(np.around(circles))
@@ -20,6 +20,8 @@ def circleDetection(image, res, color):
             cv2.circle(cimg, (i[0], i[1]), 2, (0, 0, 255), 3)
             # get boundary of this text
             writeText(cimg, color + " circle", 0.6, i[0], i[1])
+
+    cv2.imshow("circle", cimg)
 
     return cimg
 
@@ -36,8 +38,12 @@ def detect_shape(c):
     # Compute perimeter of contour and perform contour approximation
     shape = ""
     peri = cv2.arcLength(c, True)
-    approx = cv2.approxPolyDP(c, 0.04 * peri, True)
-    
+    # approx = cv2.approxPolyDP(c, 0.04 * peri, True)
+    approx = cv2.approxPolyDP(c, 0.011 * peri, True)
+
+    if len(approx) > 4 and len(approx) < 8:
+        approx = cv2.approxPolyDP(c, 0.04 * peri, True)
+
     print(len(approx))
 
     # Triangle
@@ -52,6 +58,10 @@ def detect_shape(c):
         # A square will have an aspect ratio that is approximately
         # equal to one, otherwise, the shape is a rectangle
         shape = "square" if ar >= 0.95 and ar <= 1.05 else "rectangle"
+
+    #Stop
+    elif len(approx) == 8:
+        shape = "octagonal"
 
     # Otherwise assume as circle or oval
     else:
@@ -85,6 +95,7 @@ def shapeDetection(image, colorRes, redRes, blueRes):
         area = cv2.contourArea(c)
 
         if area > 100:        # Identify shape
+            # circleDetection(image, colorRes, "red")
             shape = detect_shape(c)
 
             if shape != "":
