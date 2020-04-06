@@ -19,12 +19,6 @@ lighting = {
 
 def fixBadContrast(image):
     img = image.copy()
-   
-    # _, _, gray = cv2.split(image)
-    # clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-    # cl1 = clahe.apply(gray)
-
-    # cv2.imshow("contrast", cl1)
 
     lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
     
@@ -49,6 +43,7 @@ def fixBadLighting(image):
     return lighting
 
 
+# Apply image segmentation, in order to get a result with only blue and red colors
 def colorDetection(image, type):
     hsvImg = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 

@@ -18,10 +18,14 @@ def readImageFromCamera():
     cap.release()
     return frame
 
+
 if __name__ == "__main__":
+    # Parse CLI arguments
     parser = argparse.ArgumentParser(description='Process a road image.')
     parser.add_argument(
         '-f', '--file', help="Read the image from a file.", type=str, required=False)
+    parser.add_argument(
+        '-q', '--quality', help="Estimated quality of the image. True indicates good quality, false otherwise.", type=str, nargs="?", const="True", default="True", required=False)
     args = parser.parse_args()
 
     image = readImageFromFile(
@@ -31,45 +35,35 @@ if __name__ == "__main__":
         print("Image not found!")
         quit()
 
+    if not args.quality == "True":
 
-    #Color correction
-    contrast_image = color_detection.fixBadContrast(image)
-    lighting_image = color_detection.fixBadLighting(image)
-    
+        # Color correction
+        contrast_image = color_detection.fixBadContrast(image)
+        lighting_image = color_detection.fixBadLighting(image)
 
-    # Color detection in both regular and bad lighting
-    regColorRes, regBlueRes, regRedRes = color_detection.colorDetection(image, "regular")
-    contrastColorRes, contrastBlueRes, contrastRedRes = color_detection.colorDetection(contrast_image, "bad")
-    lightingColorRes, lightingBlueRes, lightingRedRes = color_detection.colorDetection(lighting_image, "bad")
-    
-    #Shape detection in both regular and bad lighting
-    
-    regular_signs = shape_detection.shapeDetection(image, regColorRes, regRedRes, regBlueRes)
-    contrast_regular_signs = shape_detection.shapeDetection(contrast_image, contrastColorRes, contrastRedRes, contrastBlueRes)
-    lighting_regular_signs = shape_detection.shapeDetection(lighting_image, lightingColorRes, lightingRedRes, lightingBlueRes)
+        # Color detection in both regular and bad lighting
+        contrastColorRes, contrastBlueRes, contrastRedRes = color_detection.colorDetection(
+            contrast_image, "bad")
+        lightingColorRes, lightingBlueRes, lightingRedRes = color_detection.colorDetection(
+            lighting_image, "bad")
 
-    # bad_signs = shape_detection.shapeDetection(image, badColorRes, badRedRes, badBlueRes)
+        # Shape detection in both regular and bad lighting
+        contrast_regular_signs = shape_detection.shapeDetection(
+            contrast_image, contrastColorRes, contrastRedRes, contrastBlueRes)
+        lighting_regular_signs = shape_detection.shapeDetection(
+            lighting_image, lightingColorRes, lightingRedRes, lightingBlueRes)
 
-    # Print Results
-    cv2.imshow('Regular', regular_signs)
-    cv2.imshow('Fixed Contrast', contrast_regular_signs)
-    cv2.imshow('Fixed Lighting', lighting_regular_signs)
+        cv2.imshow('Fixed Contrast', contrast_regular_signs)
+        cv2.imshow('Fixed Lighting', lighting_regular_signs)
+    else:
+        regColorRes, regBlueRes, regRedRes = color_detection.colorDetection(
+            image, "regular")
 
-    # cv2.imshow('Regular Blue', regBlueRes)
-    # cv2.imshow('Contrast Blue', contrastBlueRes)
-    # cv2.imshow('Lighting Blue', lightingBlueRes)
+        regular_signs = shape_detection.shapeDetection(
+            image, regColorRes, regRedRes, regBlueRes)
 
-    # cv2.imshow('Regular Red', regRedRes)
-    # cv2.imshow('Contrast Red', contrastRedRes)
-    # cv2.imshow('Lighting Red', lightingRedRes)
-
-    
-    # cv2.imshow('Regular Blue', regBlueRes)
-    # cv2.imshow('Bad Blue', badBlueRes)
-
-    # cv2.imshow('Regular Red', regRedRes)
-    # cv2.imshow('Bad Red', badRedRes)
-
+        # Print Results
+        cv2.imshow('Regular', regular_signs)
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
