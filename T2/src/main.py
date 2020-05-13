@@ -1,7 +1,7 @@
 import keras.backend.tensorflow_backend as tfback
 import tensorflow as tf
 import sys
-from task1 import task1, task1_BOVW
+from task1 import task1_CNN, task1_BOVW
 from task2 import task2
 from task3 import task3
 
@@ -33,9 +33,9 @@ def main():
     task = sys.argv[1]
 
     if task == '1':
-        task1_BOVW()
+        task1_CNN()
     elif task == '2':
-        pass
+        task2()
     else:
         pass
 

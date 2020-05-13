@@ -4,10 +4,11 @@ import os
 import numpy as np
 from shutil import copyfile
 
-trainingFileName1 = "../res/ISBI2016_ISIC_Part3_Training_GroundTruth.csv"
-testingFileName1 = "../res/ISBI2016_ISIC_Part3_Test_GroundTruth.csv"
-trainingBaseFolder1 = "../res/ISBI2016_ISIC_Part3_Training_Data"
-testingBaseFolder1 = "../res/ISBI2016_ISIC_Part3_Test_Data"
+trainingFileName1 = "../res/Task 1/ISBI2016_ISIC_Part3_Training_GroundTruth.csv"
+testingFileName1 = "../res/Task 1/ISBI2016_ISIC_Part3_Test_GroundTruth.csv"
+trainingBaseFolder1 = "../res/Task 1/Training"
+testingBaseFolder1 = "../res/Tasl 1/Test"
+
 trainingFileName2 = "../res/Task 2/ISIC2018_Task3_Training_GroundTruth.csv"
 trainingBaseFolder2 = "../res/Task 2/"
 
@@ -97,5 +98,5 @@ def splitTask2Sets(path_to_data, path_to_test_data, train_ratio):
 if __name__ == "__main__":
     # fixFolderStructure(trainingBaseFolder1, trainingFileName1)
     # fixFolderStructure(testingBaseFolder1, testingFileName1)
-    # fixTask2FolderStructure(trainingBaseFolder2, trainingFileName2)
+    fixTask2FolderStructure(trainingBaseFolder2, trainingFileName2)
     splitTask2Sets("../res/Task 2/Training", "../res/Task 2/Test", 0.7)
