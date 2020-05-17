@@ -33,7 +33,7 @@ def main():
     task = sys.argv[1]
 
     if task == '1':
-        task1_CNN()
+        task1_BOVW()
     elif task == '2':
         task2()
     else:

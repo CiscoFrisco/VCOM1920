@@ -9,6 +9,7 @@ import numpy as np
 
 def task1_BOVW():
     bovw.training()
+    bovw.validate()
 
 
 def task1_CNN():
