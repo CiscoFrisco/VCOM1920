@@ -122,7 +122,7 @@ def training():
 
     # Train an algorithm to discriminate vectors corresponding to positive and negative training images
     # Train the Linear SVM - Default of 100 is not converging
-    clf = LinearSVC(max_iter=10000)
+    clf = LinearSVC(max_iter=50000)
     clf.fit(im_features, np.array(image_classes))
     print("Training finished...")
 
@@ -133,7 +133,7 @@ def training():
 
     storeSVM(clf, training_names, stdSlr, k, voc)
     print("Model stored!")
-    print("---Exec Time: %s seconds ---" % (time.time() - start_time))
+    print("Training Time: %s seconds" % (time.time() - start_time))
 
 
 def calcFeatureHistogram(image_paths, des_list, stdSlr, k, voc):
