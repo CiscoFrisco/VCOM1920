@@ -37,7 +37,7 @@ def main():
     elif task == '2':
         task2()
     else:
-        pass
+        task3()
 
 
 if __name__ == "__main__":

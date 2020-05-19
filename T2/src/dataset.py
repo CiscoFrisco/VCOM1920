@@ -12,6 +12,9 @@ testingBaseFolder1 = "../res/Tasl 1/Test"
 trainingFileName2 = "../res/Task 2/ISIC2018_Task3_Training_GroundTruth.csv"
 trainingBaseFolder2 = "../res/Task 2/"
 
+trainingBaseFolder3 = "../res/Task 3/train_masks"
+testBaseFolder3 = "../res/Task 3/test_masks"
+
 
 def fixTask2FolderStructure(basefolder, fileName):
 
@@ -61,6 +64,20 @@ def fixFolderStructure(basefolder, fileName):
                 os.rename(path, basefolder + "/" +
                           className + "/" + imgName + ".jpg")
 
+def fixTask3FolderStructure(basefolder):
+    if not os.path.isdir(basefolder + "/globules"):
+        os.mkdir(basefolder + "/globules")
+        os.mkdir(basefolder + "/streaks")
+
+    for filename in os.listdir(basefolder):
+        if os.path.isdir(basefolder + "/" + filename):
+            continue
+        if "globules" in filename:
+            os.rename(basefolder + "/" + filename, basefolder + "/globules/" + filename)
+        elif "streaks" in filename:
+            os.rename(basefolder + "/" + filename, basefolder + "/streaks/" + filename)
+    
+
 
 def get_files_from_folder(path):
     files = os.listdir(path)
@@ -98,5 +115,7 @@ def splitTask2Sets(path_to_data, path_to_test_data, train_ratio):
 if __name__ == "__main__":
     # fixFolderStructure(trainingBaseFolder1, trainingFileName1)
     # fixFolderStructure(testingBaseFolder1, testingFileName1)
-    fixTask2FolderStructure(trainingBaseFolder2, trainingFileName2)
-    splitTask2Sets("../res/Task 2/Training", "../res/Task 2/Test", 0.7)
+    # fixTask2FolderStructure(trainingBaseFolder2, trainingFileName2)
+    # splitTask2Sets("../res/Task 2/Training", "../res/Task 2/Test", 0.7)
+    fixTask3FolderStructure(trainingBaseFolder3)
+    fixTask3FolderStructure(testBaseFolder3)
