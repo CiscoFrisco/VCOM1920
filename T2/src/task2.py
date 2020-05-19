@@ -4,7 +4,13 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
 import os
 import numpy as np
+import csv
+from sklearn.metrics import classification_report, confusion_matrix
+from collections import Counter
+from sklearn.utils import class_weight
 
+
+labels = ["Actinic keratosis", "Basal cell carcinoma", "Benign keratosis", "Dermatofibroma", "Melanocytic nevus", "Melanoma", "Vascular lesion"]
 
 def task2():
     model = Sequential()
@@ -26,10 +32,10 @@ def task2():
     model.add(Dense(64))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
-    model.add(Dense(7))
-    model.add(Activation('sigmoid'))
+    model.add(Dense(len(labels)))
+    model.add(Activation('softmax'))
 
-    model.compile(loss='binary_crossentropy',
+    model.compile(loss='categorical_crossentropy',
                   optimizer='rmsprop',
                   metrics=['accuracy'])
 
@@ -39,8 +45,7 @@ def task2():
     total_test = 3005
 
     batch_size = 16
-    epochs = 15
-    labels = ["Actinic keratosis", "Basal cell carcinoma", "Benign keratosis", "Dermatofibroma", "Melanocytic nevus", "Melanoma", "Vascular lesion"]
+    epochs = 1
 
     # this is the augmentation configuration we will use for training
     train_datagen = ImageDataGenerator(
@@ -58,6 +63,10 @@ def task2():
     test_generator = test_datagen.flow_from_directory(
         test_folder, class_mode='categorical', batch_size=batch_size, target_size=(150, 150),)
 
+    counter = Counter(train_generator.classes)                          
+    max_val = float(max(counter.values()))       
+    class_weights = {class_id : max_val/num_images for class_id, num_images in counter.items()}              
+
     # confirm the iterator works
     batchX, batchy = train_generator.next()
     print('Batch shape=%s, min=%.3f, max=%.3f' %
@@ -66,13 +75,28 @@ def task2():
     model.fit_generator(
         train_generator,
         steps_per_epoch=total_train // batch_size,
-        epochs=epochs)
+        epochs=epochs,
+        class_weight=class_weights)
 
-    model.evaluate_generator(test_generator)
+    scores = model.evaluate_generator(test_generator, total_test // batch_size)
 
-    predictions = model.predict_generator(test_generator)
+    print("Test accuracy = ", scores[1])
 
+    predictions = model.predict_generator(test_generator, total_test // batch_size + 1)
+    y_pred = np.argmax(predictions, axis=1)
     print(np.argmax(predictions[0]), labels[np.argmax(predictions[0])])
+
+    with open('results2.csv', mode="w") as results_file:
+        writer = csv.writer(results_file, delimiter=',',
+                        quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+        for x in predictions:
+            writer.writerow(x)
+
+    print('Confusion Matrix')
+    print(confusion_matrix(test_generator.classes, y_pred))
+    print('Classification Report')
+    print(classification_report(test_generator.classes, y_pred, target_names=labels))
 
     # always save your weights after training or during training
     model.save_weights('first_try.h5')
