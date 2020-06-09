@@ -128,7 +128,7 @@ def training():
 
     # Train an algorithm to discriminate vectors corresponding to positive and negative training images
     # Train the Linear SVM - Default of 100 is not converging
-    clf = LinearSVC(max_iter=1000000)
+    clf = LinearSVC(max_iter=50000)
     clf.fit(im_features, np.array(image_classes))
     print("Training finished...")
 
@@ -182,18 +182,19 @@ def printResults(true_class, predictions, accuracy, cm):
     accuracy_malignant = float(cm[1][1])/(cm[1][0]+cm[1][1])
 
     results = make_subplots(
-        rows=2, cols=2,
+        rows=1, cols=2,
         shared_xaxes=True,
-        row_heights=[0.8, 0.2],
+        row_heights=[1],
         vertical_spacing=0.03,
-        specs=[[{"colspan": 2, "type": "table"}, None],
-               [{"colspan": 1, "type": "table"}, {"colspan": 1, "type": "table"}]]
+        specs=[
+                [{"colspan": 1, "type": "table"}, {"colspan": 1, "type": "table"}]
+            ]
     )
 
-    results.add_trace(go.Table(header=dict(values=['True Class', 'Prediction']),
-                               cells=dict(values=[true_class, predictions])
-                               ), row=1, col=1
-                      )
+    # results.add_trace(go.Table(header=dict(values=['True Class', 'Prediction']),
+    #                            cells=dict(values=[true_class, predictions])
+    #                            ), row=1, col=1
+    #                   )
 
     results.add_trace(
         go.Table(
@@ -209,7 +210,7 @@ def printResults(true_class, predictions, accuracy, cm):
                     [cm[0][1], cm[1][1]]
                 ]
             )
-        ), row=2, col=1
+        ), row=1, col=1
     )
 
     results.add_trace(
@@ -223,7 +224,7 @@ def printResults(true_class, predictions, accuracy, cm):
                 font=dict(size=10),
                 align="left"
             )
-        ), row=2, col=2
+        ), row=1, col=2
     )
 
     results.show()
