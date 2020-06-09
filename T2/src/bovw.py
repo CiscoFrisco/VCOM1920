@@ -49,8 +49,8 @@ def featureExtraction(image_paths, isTraining):
     brisk = cv2.BRISK_create(thresh=10, octaves=1)
     for image_path in image_paths:
         im = cv2.imread(image_path)
-        # small_im = cv2.resize(im, (178, 218), interpolation=cv2.INTER_AREA)
-        _, des = brisk.detectAndCompute(im, None)
+        small_im = cv2.resize(im, (178, 218), interpolation=cv2.INTER_AREA)
+        _, des = brisk.detectAndCompute(small_im, None)
         des_list.append((image_path, des))
 
     # Stack all the descriptors vertically in a numpy array
@@ -178,6 +178,9 @@ def validate():
 
 def printResults(true_class, predictions, accuracy, cm):
 
+    accuracy_benign = float(cm[0][0])/(cm[0][0]+cm[0][1])
+    accuracy_malignant = float(cm[1][1])/(cm[1][0]+cm[1][1])
+
     results = make_subplots(
         rows=2, cols=2,
         shared_xaxes=True,
@@ -212,7 +215,11 @@ def printResults(true_class, predictions, accuracy, cm):
     results.add_trace(
         go.Table(
             header=dict(
-                values=["Accuracy", accuracy],
+                values=[
+                    ["Accuracy", accuracy],
+                    ["Accuracy Benign", accuracy_benign ],
+                    ["Accuracy Malignant", accuracy_malignant]
+                ],
                 font=dict(size=10),
                 align="left"
             )
