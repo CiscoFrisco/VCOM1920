@@ -8,6 +8,7 @@ import numpy as np
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.utils import class_weight
 from collections import Counter
+from utils import plot_cm
 
 import csv
 
@@ -34,6 +35,7 @@ def task1_CNN():
 
     # this converts our 3D feature maps to 1D feature vectors
     model.add(Flatten())
+    model.add(Dropout(0.5))
     model.add(Dense(64))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
@@ -49,8 +51,8 @@ def task1_CNN():
     total_train = 900
     total_test = 379
 
-    batch_size = 16
-    epochs = 15
+    batch_size = 100
+    epochs = 50
     labels = ["bening", "malignant"]
 
     # this is the augmentation configuration we will use for training
@@ -101,7 +103,9 @@ def task1_CNN():
     true_classes = test_generator.classes
     class_labels = list(test_generator.class_indices.keys())
     print('Confusion Matrix')
-    print(confusion_matrix(true_classes, predicted_classes))
+    cm = confusion_matrix(true_classes, predicted_classes)
+    print(cm)
+    plot_cm(cm, labels, "first.png")
     print('Classification Report')
     print(classification_report(true_classes,
                                 predicted_classes, target_names=class_labels))
