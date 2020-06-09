@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt     
 
+# Save a confusion matrix as png
 def plot_cm(cm, labels, filename):
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -11,3 +12,4 @@ def plot_cm(cm, labels, filename):
     plt.xlabel('Predicted')
     plt.ylabel('True')
     plt.savefig(filename)
+ 

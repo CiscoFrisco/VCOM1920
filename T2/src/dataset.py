@@ -1,21 +1,44 @@
 import csv
 import shutil
 import os
+import sys
 import numpy as np
 from shutil import copyfile
 
 trainingFileName1 = "../res/Task 1/ISBI2016_ISIC_Part3_Training_GroundTruth.csv"
 testingFileName1 = "../res/Task 1/ISBI2016_ISIC_Part3_Test_GroundTruth.csv"
 trainingBaseFolder1 = "../res/Task 1/Training"
-testingBaseFolder1 = "../res/Tasl 1/Test"
+testingBaseFolder1 = "../res/Task 1/Test"
 
 trainingFileName2 = "../res/Task 2/ISIC2018_Task3_Training_GroundTruth.csv"
-trainingBaseFolder2 = "../res/Task 2/"
+trainingBaseFolder2 = "../res/Task 2/Training"
+testingBaseFolder2 = "../res/Task 2/Test"
 
-trainingBaseFolder3 = "../res/Task 3/train_masks"
-testBaseFolder3 = "../res/Task 3/test_masks"
+# Creates a folder for the bening and malignant classes, and moves the images to their appropriate place
+def fixTask1FolderStructure(basefolder, fileName):
+    if not os.path.isdir(basefolder + "/benign"):
+        os.mkdir(basefolder + "/benign")
+        os.mkdir(basefolder + "/malignant")
 
+    with open(fileName, 'r') as csvfile:
+        csvreader = csv.reader(csvfile)
 
+        for row in csvreader:
+            imgName = row[0]
+            className = row[1]
+
+            if className == "0.0":
+                className = "benign"
+            elif className == "1.0":
+                className = "malignant"
+
+            path = basefolder + "/" + imgName + ".jpg"
+
+            if os.path.exists(path):
+                os.rename(path, basefolder + "/" +
+                          className + "/" + imgName + ".jpg")
+
+# Creates a folder for each of the 7 classes, and moves the images to their appropriate place
 def fixTask2FolderStructure(basefolder, fileName):
 
     classNames = ["Melanoma",
@@ -39,52 +62,16 @@ def fixTask2FolderStructure(basefolder, fileName):
             if os.path.exists(path):
                 os.rename(path, basefolder + "/" +
                           className + "/" + imgName + ".jpg")
-
-
-def fixFolderStructure(basefolder, fileName):
-    if not os.path.isdir(basefolder + "/benign"):
-        os.mkdir(basefolder + "/benign")
-        os.mkdir(basefolder + "/malignant")
-
-    with open(fileName, 'r') as csvfile:
-        csvreader = csv.reader(csvfile)
-
-        for row in csvreader:
-            imgName = row[0]
-            className = row[1]
-
-            if className == "0.0":
-                className = "benign"
-            elif className == "1.0":
-                className = "malignant"
-
-            path = basefolder + "/" + imgName + ".jpg"
-
-            if os.path.exists(path):
-                os.rename(path, basefolder + "/" +
-                          className + "/" + imgName + ".jpg")
-
-def fixTask3FolderStructure(basefolder):
-    if not os.path.isdir(basefolder + "/globules"):
-        os.mkdir(basefolder + "/globules")
-        os.mkdir(basefolder + "/streaks")
-
-    for filename in os.listdir(basefolder):
-        if os.path.isdir(basefolder + "/" + filename):
-            continue
-        if "globules" in filename:
-            os.rename(basefolder + "/" + filename, basefolder + "/globules/" + filename)
-        elif "streaks" in filename:
-            os.rename(basefolder + "/" + filename, basefolder + "/streaks/" + filename)
-    
+   
 
 
 def get_files_from_folder(path):
     files = os.listdir(path)
     return np.asarray(files)
 
-
-def splitTask2Sets(path_to_data, path_to_test_data, train_ratio):
+# Splits a set in two, while keeping the proportions of each class
+# Useful two split the dataset for the second exercise in training and testing
+def splitSets(path_to_data, path_to_test_data, train_ratio):
     # get dirs
     _, dirs, _ = next(os.walk(path_to_data))
 
@@ -112,10 +99,20 @@ def splitTask2Sets(path_to_data, path_to_test_data, train_ratio):
             shutil.move(src, dst)
 
 
+def main():
+    if len(sys.argv) != 2 or (sys.argv[1] != '1' and sys.argv[1] != '2'):
+        print("Usage: python " + sys.argv[0] + " <TASK>")
+        print("Where TASK is one of 1 or 2.")
+        return
+
+    task = sys.argv[1]
+
+    if task == '1':
+        fixTask1FolderStructure(trainingBaseFolder1, trainingFileName1)
+        fixTask1FolderStructure(testingBaseFolder1, testingFileName1)
+    else:
+        fixTask2FolderStructure(trainingBaseFolder2, trainingFileName2)
+        splitSets(trainingBaseFolder2, testingBaseFolder2, 0.7)
+
 if __name__ == "__main__":
-    # fixFolderStructure(trainingBaseFolder1, trainingFileName1)
-    # fixFolderStructure(testingBaseFolder1, testingFileName1)
-    # fixTask2FolderStructure(trainingBaseFolder2, trainingFileName2)
-    # splitTask2Sets("../res/Task 2/Training", "../res/Task 2/Test", 0.7)
-    fixTask3FolderStructure(trainingBaseFolder3)
-    fixTask3FolderStructure(testBaseFolder3)
+    main()
