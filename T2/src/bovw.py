@@ -49,13 +49,13 @@ def featureExtraction(image_paths, isTraining):
     brisk = cv2.BRISK_create(thresh=10, octaves=1)
     for image_path in image_paths:
         im = cv2.imread(image_path)
-        small_im = cv2.resize(im, (178, 218), interpolation=cv2.INTER_AREA)
-        _, des = brisk.detectAndCompute(small_im, None)
+        # small_im = cv2.resize(im, (178, 218), interpolation=cv2.INTER_AREA)
+        _, des = brisk.detectAndCompute(im, None)
         des_list.append((image_path, des))
 
     # Stack all the descriptors vertically in a numpy array
     descriptors = des_list[0][1]
-    for _, descriptor in des_list[1:]:
+    for image_path, descriptor in des_list[1:]:
         descriptors = np.vstack((descriptors, descriptor))
 
     if isTraining is True:
@@ -69,28 +69,26 @@ def featureExtraction(image_paths, isTraining):
 def KMeansCluster(descriptors, des_list, image_paths):
     # Perform k-means clustering and vector quantization
     k = 200  # k means with 100 clusters gives lower accuracy for the aeroplane example
-    kmeans_start = time.time()
     voc, _ = kmeans(descriptors, k, 1)
-    print("KMeans Time:%s" % (time.time() - kmeans_start))
-    # Calculate the histogram of features and represent them as vector
+
+    return k, voc
+
+
+def calcFeatureHistogram(image_paths, des_list, k, voc):
+
+    # Calculate the histogram of features
     # vq Assigns codes from a code book to observations.
-    im_features = np.zeros((len(image_paths), k), "float32")
+    features = np.zeros((len(image_paths), k), "float32")
 
     for i in range(len(image_paths)):
         words, _ = vq(des_list[i][1], voc)
         for w in words:
-            im_features[i][w] += 1
+            features[i][w] += 1
 
-    return im_features, k, voc
-
-
-# def tfIdf(im_features, image_paths):
-# 	# Perform Tf-Idf vectorization
-# 	nbr_occurences = np.sum( (im_features > 0) * 1, axis = 0)
-# 	idf = np.array(np.log((1.0*len(image_paths)+1) / (1.0*nbr_occurences + 1)), 'float32')
+    return features
 
 
-def normalization(im_features):
+def normalizationTraining(im_features):
     # Scaling the words
     # Standardize features by removing the mean and scaling to unit variance
     # In a way normalization
@@ -100,10 +98,12 @@ def normalization(im_features):
     return stdSlr, new_im_features
 
 
-def storeSVM(clf, training_names, stdSlr, k, voc):
-    # Save the SVM
-    # Joblib dumps Python object into one file
-    joblib.dump((clf, training_names, stdSlr, k, voc), "bovw.pkl", compress=3)
+def normalizationTest(features, stdSlr):
+    # Scale the features
+    # Standardize features by removing the mean and scaling to unit variance
+    # Scaler (stdSlr comes from the pickled file we imported)
+    features = stdSlr.transform(features)
+    return features
 
 
 def training():
@@ -111,52 +111,70 @@ def training():
     start_time = time.time()
 
     image_paths, image_classes, training_names = getInformation(
-        '../res/ISBI2016_ISIC_Part3_Training_Data')
+        '../res/Task 1/Training')
+    print('Training Information Loaded...')
 
     des_list, descriptors = featureExtraction(image_paths, True)
     print("Feature Extraction Finished...")
-    im_features, k, voc = KMeansCluster(descriptors, des_list, image_paths)
+
+    k, voc = KMeansCluster(descriptors, des_list, image_paths)
     print("Clustering Finished...")
-    stdSlr, im_features = normalization(im_features)
+
+    im_features = calcFeatureHistogram(image_paths, des_list, k, voc)
+    print("Feature Histogram calculated...")
+
+    stdSlr, im_features = normalizationTraining(im_features)
     print("Normalization Finished...")
 
     # Train an algorithm to discriminate vectors corresponding to positive and negative training images
     # Train the Linear SVM - Default of 100 is not converging
-    clf = LinearSVC(max_iter=50000)
+    clf = LinearSVC(max_iter=1000000)
     clf.fit(im_features, np.array(image_classes))
     print("Training finished...")
 
     # Train Random forest to compare how it does against SVM
     # from sklearn.ensemble import RandomForestClassifier
-    # clf = RandomForestClassifier(n_estimators = 100, random_state=30)
+    # clf = RandomForestClassifier(n_estimators=100, random_state=30)
     # clf.fit(im_features, np.array(image_classes))
 
-    storeSVM(clf, training_names, stdSlr, k, voc)
+    joblib.dump((clf, training_names, stdSlr, k, voc), "bovw.pkl", compress=3)
     print("Model stored!")
     print("Training Time: %s seconds" % (time.time() - start_time))
 
 
-def calcFeatureHistogram(image_paths, des_list, stdSlr, k, voc):
+def validate():
 
-    # Calculate the histogram of features
-    # vq Assigns codes from a code book to observations.
-    test_features = np.zeros((len(image_paths), k), "float32")
+    # load the classifier, class names, scaler, number of clusters and vocabulary
+    clf, classes_names, stdSlr, k, voc = joblib.load("bovw.pkl")
+    print("Model loaded...")
 
-    for i in range(len(image_paths)):
-        words, _ = vq(des_list[i][1], voc)
-    for w in words:
-        test_features[i][w] += 1
+    image_paths, image_classes, _ = getInformation(
+        '../res/Task 1/Test')
+    print('Test Information Loaded...')
 
-    # Perform Tf-Idf vectorization
-    # nbr_occurences = np.sum( (test_features > 0) * 1, axis = 0)
-    # idf = np.array(np.log((1.0*len(image_paths)+1) / (1.0*nbr_occurences + 1)), 'float32')
+    des_list, _ = featureExtraction(image_paths, False)
+    print("Feature Extraction Finished...")
 
-    # Scale the features
-    # Standardize features by removing the mean and scaling to unit variance
-    # Scaler (stdSlr comes from the pickled file we imported)
-    test_features = stdSlr.transform(test_features)
+    test_features = calcFeatureHistogram(image_paths, des_list, k, voc)
+    print("Feature Histogram calculated...")
 
-    return test_features
+    test_features = normalizationTest(test_features, stdSlr)
+    print("Normalization Finished...")
+
+    # Report true class names so they can be compared with predicted classes
+    true_class = [classes_names[i] for i in image_classes]
+    # Perform the predictions and report predicted class names.
+    predictions = [classes_names[i] for i in clf.predict(test_features)]
+
+    accuracy = accuracy_score(true_class, predictions)
+    cm = confusion_matrix(true_class, predictions)
+
+    print(cm)
+    print(accuracy)
+
+    # Print the Results (True Class and Prediction, Accuracy and Confusion Matrix)
+    printResults(true_class, predictions, accuracy, cm)
+
 
 def printResults(true_class, predictions, accuracy, cm):
 
@@ -166,13 +184,13 @@ def printResults(true_class, predictions, accuracy, cm):
         row_heights=[0.8, 0.2],
         vertical_spacing=0.03,
         specs=[[{"colspan": 2, "type": "table"}, None],
-            [{"colspan": 1, "type": "table"}, {"colspan": 1, "type": "table"}]]
+               [{"colspan": 1, "type": "table"}, {"colspan": 1, "type": "table"}]]
     )
 
     results.add_trace(go.Table(header=dict(values=['True Class', 'Prediction']),
-                cells=dict(values=[true_class, predictions])
-            ), row= 1, col= 1
-    )
+                               cells=dict(values=[true_class, predictions])
+                               ), row=1, col=1
+                      )
 
     results.add_trace(
         go.Table(
@@ -184,11 +202,11 @@ def printResults(true_class, predictions, accuracy, cm):
             cells=dict(
                 values=[
                     ["True Benign", "True Malign"],
-                    [cm[0][0],cm[1][0]],
-                    [cm[0][1],cm[1][1]]
+                    [cm[0][0], cm[1][0]],
+                    [cm[0][1], cm[1][1]]
                 ]
             )
-        ), row= 2, col = 1
+        ), row=2, col=1
     )
 
     results.add_trace(
@@ -198,32 +216,7 @@ def printResults(true_class, predictions, accuracy, cm):
                 font=dict(size=10),
                 align="left"
             )
-        ), row= 2, col = 2
+        ), row=2, col=2
     )
- 
+
     results.show()
-
-def validate():
-
-    clf, classes_names, stdSlr, k, voc = joblib.load("bovw.pkl")
-    print("Model loaded...")
-
-    image_paths, image_classes, _ = getInformation(
-        '../res/ISBI2016_ISIC_Part3_Test_Data')
-
-    des_list, _ = featureExtraction(image_paths, False)
-    print("Feature Extraction Finished...")
-
-    test_features = calcFeatureHistogram(image_paths, des_list, stdSlr, k, voc)
-    print("Feature Histogram calculated...")
-
-    # Report true class names so they can be compared with predicted classes
-    true_class = [classes_names[i] for i in image_classes]
-    # Perform the predictions and report predicted class names.
-    predictions = [classes_names[i] for i in clf.predict(test_features)]
-
-    accuracy = accuracy_score(true_class, predictions)
-    cm = confusion_matrix(true_class, predictions)
-
-    #Print the Results (True Class and Prediction, Accuracy and Confusion Matrix) 
-    printResults(true_class, predictions, accuracy, cm)
